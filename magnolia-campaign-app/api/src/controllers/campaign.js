@@ -4,14 +4,9 @@ const { kafka } = require("./client");
 
 module.exports.unsubscribe = asyncHandler(async (req, res, next) => {  
   const { CampaignId, User } = req.body;
-  console.log('----------------------------------------------------------------------------------------------')
-  console.log('[unsubscribe]', CampaignId, User) 
-  console.log('----------------------------------------------------------------------------------------------')
-
   if (!CampaignId) {
     return next(new ErrorResponse(`Could not complete the request`, 404));
   }
-
   if (!User) {
     return next(new ErrorResponse(`Could not complete the request`, 404));
   }
@@ -20,33 +15,29 @@ module.exports.unsubscribe = asyncHandler(async (req, res, next) => {
     const config1 = {
       method: 'GET',
       headers: {
+          'apikey': process.env.PG_REST_API_KEY,
           'Content-Type': 'application/json',
       },
     }
     const userExistsInCampaign = await 
     fetch(pgrestUrlGetCampaignUsersByIdAndUser + 'campaignuser?campaignid=eq.' + 
       CampaignId + '&usercommaddress=eq.' + User, config1);
-
     let userExistsResponse = await userExistsInCampaign.json();
-    if(userExistsResponse.length > 0){
-      return next(new ErrorResponse(`User is already subscribed to this campaign`, 400));
+    if(userExistsResponse.length <= 0){
+      return next(new ErrorResponse(`Cannot unsubscribe as user not subscribed to this campaign`, 400));
     }
-    
-    const pgrestUrlGetCampaignById = process.env.PG_REST_URL ?? "http://flower-samples-api.bitwebservices.com/";
-    let data =  { 
-      campaignid: CampaignId,
-      usercommaddress : User
-    }
-    const config = {
-      method: 'POST',
+    let userCampaignUserId = userExistsResponse[0].campaignuserid;
+    const pgrestUrlDeleteByCampaignUserId = process.env.PG_REST_URL ?? "http://flower-samples-api.bitwebservices.com/";
+    const configdelete = {
+      method: 'DELETE',
       headers: {
-          //'Accept': '*/*',
+          'apikey': process.env.PG_REST_API_KEY,
           'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
+      }
     }
-    const responseCampaign = await fetch(pgrestUrlGetCampaignById + 'campaignuser', config);
-    res.status(201).json(data);
+    const responseCampaignUsersDelete = await 
+    fetch(pgrestUrlDeleteByCampaignUserId + 'campaignuser?campaignuserid=eq.' + userCampaignUserId, configdelete);
+    res.status(204).json({});
   } catch (error) {
     console.log('[error]', error)
     return next(new ErrorResponse(`Unhandled exception` + error, 400));
@@ -55,14 +46,9 @@ module.exports.unsubscribe = asyncHandler(async (req, res, next) => {
 
 module.exports.subscribe = asyncHandler(async (req, res, next) => {  
   const { CampaignId, User } = req.body;
-  console.log('----------------------------------------------------------------------------------------------')
-  console.log('[subscribe', CampaignId, User) 
-  console.log('----------------------------------------------------------------------------------------------')
-
   if (!CampaignId) {
     return next(new ErrorResponse(`Could not complete the request`, 404));
   }
-
   if (!User) {
     return next(new ErrorResponse(`Could not complete the request`, 404));
   }
@@ -71,6 +57,7 @@ module.exports.subscribe = asyncHandler(async (req, res, next) => {
     const config1 = {
       method: 'GET',
       headers: {
+          'apikey': process.env.PG_REST_API_KEY,
           'Content-Type': 'application/json',
       },
     }
@@ -91,7 +78,7 @@ module.exports.subscribe = asyncHandler(async (req, res, next) => {
     const config = {
       method: 'POST',
       headers: {
-          //'Accept': '*/*',
+          'apikey': process.env.PG_REST_API_KEY,
           'Content-Type': 'application/json',
       },
       body: JSON.stringify(data)
@@ -118,6 +105,7 @@ module.exports.execute = asyncHandler(async (req, res, next) => {
   const config = {
     method: 'GET',
     headers: {
+        'apikey': process.env.PG_REST_API_KEY,
         'Content-Type': 'application/json',
     },
   }
