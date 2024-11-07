@@ -14,8 +14,6 @@ This API allows for Subscribe, Unsubscribe, Execute Campaign.
 
 # Configuration
 
-Its important to note that there are env variable in `.env` and these are used through the application.
-
 ## Environment Variables
 - PG_REST_URL, KAFKA_HOST, PORT, CORS_HOST, KAFKA_TOPIC
 
@@ -37,10 +35,10 @@ To check if containers are up and running:
 # Production
  
 # Build Docker Image
-`docker build -t flowerappengorg/apps-campaign-api:0.1.0 .`
+`docker build -t flowerappengorg/apps-campaign-api:0.3.0 .`
 
 # Push Docker Image
-`docker push flowerappengorg/apps-campaign-api:0.1.0`
+`docker push flowerappengorg/apps-campaign-api:0.3.0`
 
 # Security
 This REST API intentionally has no security as it sits behind a API Gateway which handles security concerns.
