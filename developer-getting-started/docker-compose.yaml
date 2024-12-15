@@ -1,0 +1,38 @@
+services:
+   server:
+     image: postgrest/postgrest
+     ports:
+       - "3000:3000"
+     links:
+       - db:db
+     environment:
+       PGRST_DB_URI: postgres://postgres:postgres@db:5432/postgres
+       PGRST_DB_SCHEMA: public
+       PGRST_DB_ANON_ROLE: "postgres" #In production this role should not be the same as the one used for the connection
+       PGRST_SERVER_PROXY_URI: "http://127.0.0.1:3000"
+     depends_on:
+       - db
+   db:
+     container_name: container-pg
+     image: postgres
+     hostname: localhost
+     ports:
+       - "5432:5432"
+     environment:
+       POSTGRES_USER: postgres
+       POSTGRES_PASSWORD: postgres
+       POSTGRES_DB: postgres
+       PGDATA: /var/lib/postgresql/data
+     volumes:
+       - db-data-2:/var/lib/postgresql/data
+     restart: unless-stopped
+   swagger:
+     image: swaggerapi/swagger-ui
+     ports:
+         - "8080:8080"
+     expose:
+         - "8080"
+     environment:
+         API_URL: http://127.0.0.1:3000/    
+volumes:
+     db-data-2:  
